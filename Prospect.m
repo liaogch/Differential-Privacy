@@ -1,6 +1,7 @@
 lambda = 2.25;
 beta = 0.88;
-%From "advanced in prospect theory cumulative representation of uncertainty"
+%From "advanced in prospect theory cumulative representation of
+%uncertainty"sfsddfsdfsdf 
 
 n = 1000;
 u = 0.65;
