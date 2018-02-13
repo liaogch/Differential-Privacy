@@ -111,6 +111,7 @@ mean(U1)
 mean(epsilon1)
 %}
 %opt_eps_max_appro =[0.0132    0.0105    0.0084    0.0066    0.0062];
+%{
 N=[5000 10000 20000 30000 40000];
 opt_eps_max_appro = zeros(1,length(N));
 opt_eps_max1 = zeros(1,length(N));
@@ -124,6 +125,7 @@ for i=1:length(N)
     [ opt_eps_max_appro(i) ] = Approximation_fun( 2.25,N(i),1,0.5,0.5 );
 end
 plot(N,opt_eps_max1,'*-',N,opt_eps_max2,'x-',N,opt_eps_max3,'^-',N,opt_eps_max_appro,'o-','LineWidth',2,'Markers',10);
+%}
 %legend('Without approximation','With approximation');
 %xlabel('N','FontSize',15);
 %ylabel('optmal \epsilon^*','FontSize',15);
@@ -194,3 +196,228 @@ set(h,'FontSize',20)
 %}
 
 %[U,epsilon ,~] = ProspectTheoryBased( 1,0.88,0.88,5000,1,0,2,0.02,0.002:0.0001:0.03)
+%{
+lambda_1 = 2.25;
+beta_1 = 0.88;
+alpha_1 = 0.88;
+N_1 = 1000;
+u_1 = 0.65;
+epsilon_ref_1 = 0 ;
+
+lambda_2 = 4;
+beta_2 = 0.5;
+alpha_2 = 0.88;
+N_2 = 1000;
+u_2 = 0.65;
+epsilon_ref_2 = 0.001 ;
+
+C = 1;
+Wm = 0.5;
+Wl = 0.5;
+Epsilon_searchrange = 0.002:0.0001:0.05;
+data_max = 1;
+le = 1;
+
+
+average=0.5;
+sigma=1;
+lower=0;
+upper=inf;
+iteration=100;
+%}
+
+%{
+N_2 = 200:200:2000;
+Opt_epsilon_max_1 = zeros(1,length(N_2));
+Opt_epsilon_max_2 = zeros(1,length(N_2));
+Opt_epsilon_max_3 = zeros(1,length(N_2));
+for i = 1:length(N_2)
+    
+    [ Opt_U_1,Opt_epsilon_max_1(i), Opt_num_1] = ProspectTheoryBased( lambda_2,beta_2,alpha_2,u_2,epsilon_ref_2,N_1+N_2(i),C,Wm,Wl,Epsilon_searchrange );
+    
+    [ Opt_U_2,Opt_epsilon_max_2(i), Opt_num_2 ] = ProspectTheoryBase_TwoGroups( lambda_1,beta_1,alpha_1,u_1,epsilon_ref_1,N_1,lambda_2,beta_2,alpha_2,u_2,N_2(i),epsilon_ref_2,C,Wm,Wl,Epsilon_searchrange,data_max,le);
+
+    [ Opt_U_3,Opt_epsilon_max_3(i), Opt_num_3] = ProspectTheoryBased( lambda_1,beta_1,alpha_1,u_1,epsilon_ref_1,N_1+N_2(i),C,Wm,Wl,Epsilon_searchrange );
+end
+%}
+%{
+beta_2 = 0.4:0.1:0.9;
+Opt_epsilon_max_1 = zeros(1,length(beta_2));
+
+for i = 1:length(beta_2)
+    
+    [ Opt_U_1,Opt_epsilon_max_1(i), Opt_num_1] = ProspectTheoryBased( lambda_2,beta_2(i),alpha_2,u_2,epsilon_ref_2,N_1+N_2,C,Wm,Wl,Epsilon_searchrange );
+  
+end
+%}
+%plot(beta_2,Opt_epsilon_max_1,'-ro')
+%{
+lambda_1 = 1.5:0.5:3.5;
+Opt_epsilon_max_1 = zeros(1,length(lambda_1));
+Opt_epsilon_max_2 = zeros(1,length(lambda_1));
+Opt_epsilon_max_3 = zeros(1,length(lambda_1));
+tic;
+
+for i = 1:length(lambda_1)
+    
+%{
+    beta_1 = 0.4;
+    [ Opt_U_1,Opt_epsilon_max_1(i), Opt_num_1] = ProspectTheoryBased_Uniform( lambda_1(i),beta_1,alpha_1,u_1,epsilon_ref_1,N_1+N_2,C,Wm,Wl,Epsilon_searchrange);
+    beta_1 = 0.6;
+    [ Opt_U_2,Opt_epsilon_max_2(i), Opt_num_2] = ProspectTheoryBased_Uniform( lambda_1(i),beta_1,alpha_1,u_1,epsilon_ref_1,N_1+N_2,C,Wm,Wl,Epsilon_searchrange);
+    beta_1 = 0.8;
+    [ Opt_U_3,Opt_epsilon_max_3(i), Opt_num_3] = ProspectTheoryBased_Uniform( lambda_1(i),beta_1,alpha_1,u_1,epsilon_ref_1,N_1+N_2,C,Wm,Wl,Epsilon_searchrange);
+  %}  
+    beta_1 = 0.4;
+    [ Opt_U_1,Opt_epsilon_max_1(i), Opt_num_1] = ProspectTheoryBased_TruncatedNormal( lambda_1(i),beta_1,alpha_1,u_1,epsilon_ref_1,N_1+N_2,C,average,sigma,lower,upper,iteration,Epsilon_searchrange);
+    beta_1 = 0.6;
+    [ Opt_U_2,Opt_epsilon_max_2(i), Opt_num_2] = ProspectTheoryBased_TruncatedNormal( lambda_1(i),beta_1,alpha_1,u_1,epsilon_ref_1,N_1+N_2,C,average,sigma,lower,upper,iteration,Epsilon_searchrange);
+    beta_1 = 0.8;
+    [ Opt_U_3,Opt_epsilon_max_3(i), Opt_num_3] = ProspectTheoryBased_TruncatedNormal( lambda_1(i),beta_1,alpha_1,u_1,epsilon_ref_1,N_1+N_2,C,average,sigma,lower,upper,iteration,Epsilon_searchrange);
+  
+end
+toc
+
+plot(lambda_1,Opt_epsilon_max_1,'-ro',lambda_1,Opt_epsilon_max_2,'-bs',lambda_1,Opt_epsilon_max_3,'-k^','LineWidth',2);
+%}
+
+
+%{
+Lambda_spec.ave=[2 5];
+Lambda_spec.sigma=[1 1];
+Lambda_spec.probability = [0.3 0.7];
+Lambda_spec.lower = [1 1];
+Lambda_spec.upper = [inf inf];
+%Lambda_spec.N = 2000;
+
+Beta_spec.ave=0.5;
+Beta_spec.sigma=0.1;
+Beta_spec.probability = 1;
+Beta_spec.lower = 0;
+Beta_spec.upper = 1;
+%Beta_spec.N = 2000;
+Alpha = 0.5;
+Mu = 0.8;
+
+Ref = 0;
+Num = 2000;
+
+C=1;
+average=0.5;
+sigma=1;
+lower=0;
+upper=inf;
+iteration=30;
+Epsilon_searchrange = 0.002:0.0002:0.03;
+
+[ Opt_U,Opt_epsilon_max, Opt_num] = ProspectTheoryBased_TruncatedNormal_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,Num,C,average,sigma,lower,upper,iteration,Epsilon_searchrange )
+%}
+
+
+
+
+
+
+ave=[3 4;2.5 4.5;2 5;1.5 5.5];
+Lambda_spec.ave = [3 4];
+Lambda_spec.sigma=[0.1 0.1];
+Lambda_spec.probability = [0.5 0.5];
+Lambda_spec.lower = [1 1];
+Lambda_spec.upper = [inf inf];
+%Lambda_spec.N = 2000;
+
+Beta_spec.ave=0.5;
+Beta_spec.sigma=0.1;
+Beta_spec.probability = 1;
+Beta_spec.lower = 0;
+Beta_spec.upper = 1;
+%Beta_spec.N = 2000;
+Alpha = 0.5;
+Mu = 0.8;
+
+Ref = 0;
+Num = 5000;
+
+C=1;
+W = 1;
+average=0.5;
+sigma=1;
+lower=0;
+upper=inf;
+Epsilon_searchrange = 0.0002:0.0002:0.02;
+
+
+lambda = Lambda_spec.ave*Lambda_spec.probability';
+beta = Beta_spec.ave*Beta_spec.probability;
+alpha = beta;
+Mu = 0.8;
+epsilon_ref = 0;
+
+iteration=20;
+%{
+tic;
+[ Opt_U,Opt_epsilon_max, Opt_num,~] = ProspectTheoryBased_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,Num,C,W,iteration,Epsilon_searchrange);
+toc
+%}
+
+
+
+%Lambda_spec.ave = 3.5;
+%Lambda_spec.sigma=0;
+%Lambda_spec.probability = 1;
+%Lambda_spec.lower = 1;
+%Lambda_spec.upper = inf;
+
+
+%[ Opt_U,Opt_epsilon_max, Opt_num,~] = ProspectTheoryBased_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,Num,C,W,iteration,Epsilon_searchrange);
+%[ Opt_U_1,Opt_epsilon_max_1, Opt_num_1] = ProspectTheoryBased_TruncatedNormal( lambda,beta,alpha,Mu,epsilon_ref,Num,C,average,sigma,lower,upper,iteration,Epsilon_searchrange);
+
+%{
+Beta_spec.ave = 0.5;
+Beta_spec.sigma=0;
+Beta_spec.probability = 1;
+Beta_spec.lower = 0;
+Beta_spec.upper = 1;
+
+
+[ Opt_U_2,Opt_epsilon_max_2, Opt_num_2,~] = ProspectTheoryBased_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,Num,C,W,iteration,Epsilon_searchrange);
+%}
+
+%[ Opt_U_1,Opt_epsilon_max_1, Opt_num_1] = ProspectTheoryBased_TruncatedNormal( lambda,beta,alpha,Mu,epsilon_ref,Num,C,average,sigma,lower,upper,iteration,Epsilon_searchrange);
+
+
+
+Opt_U = zeros(1,length(ave));
+Opt_epsilon_max = zeros(1,length(ave));
+Opt_num = zeros(1,length(ave));
+U = zeros(1,length(ave));
+
+for i = 1: size(ave,1)
+    tic;
+    Lambda_spec.ave = ave(i,:);
+    [ Opt_U(i),Opt_epsilon_max(i), Opt_num(i),U(i)] = ProspectTheoryBased_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,Num,C,W,iteration,Epsilon_searchrange);
+    %[ Opt_U(i),Opt_epsilon_max(i), Opt_num(i),U(i)] = ProspectTheoryBased_TruncatedNormal_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,Num,C,average,sigma,lower,upper,iteration,Epsilon_searchrange );
+    toc
+end
+
+
+
+%{
+Opt_U_3 = zeros(1,length(ave));
+Opt_epsilon_max_3 = zeros(1,length(ave));
+Opt_num_3= zeros(1,length(ave));
+U_3 = zeros(1,length(ave));
+
+beta_sigma = 0.1:0.2:0.7;
+
+for i = 1: length(beta_sigma)
+    tic;
+    Beta_spec.sigma = beta_sigma(i);
+    [ Opt_U_3(i),Opt_epsilon_max_3(i), Opt_num_3(i),U_3(i)] = ProspectTheoryBased_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,Num,C,W,iteration,Epsilon_searchrange);
+    %[ Opt_U(i),Opt_epsilon_max(i), Opt_num(i),U(i)] = ProspectTheoryBased_TruncatedNormal_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,Num,C,average,sigma,lower,upper,iteration,Epsilon_searchrange );
+    toc
+end
+%}
+
+
+

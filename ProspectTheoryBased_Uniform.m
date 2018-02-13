@@ -1,12 +1,12 @@
-function [ Opt_U,Opt_epsilon_max, Opt_num] = ProspectTheoryBased( Lambda,Beta,Alpha,Num,C,W1,W2,Ref,Epsilon_max )
+function [ Opt_U,Opt_epsilon_max, Opt_num] = ProspectTheoryBased_Uniform( Lambda,Beta,Alpha,Mu,Ref,Num,C,Wm,Wl,Epsilon_searchrange )
 
 lambda = Lambda;
 beta = Beta;
 alpha = Alpha;
 %From "advanced in prospect theory cumulative representation of uncertainty"
 
-n = 1000;
-u = 0.65;
+m = 1000;
+u = Mu;
 %{
 N = Num;
 %n_target = N/3*2; %data amount utility is 2/3 at this number
@@ -36,39 +36,40 @@ c = C;
 %W_max = 1;
 
 %{
-mu = 1;
-sigma = 1;
-
-nd=makedist('normal','mu',mu,'sigma',sigma);
-td=truncate(nd,W1,W2);
-iter = 5;
-Wi = random(td,N*iter,1);
+if strcmp(opt, 'truncated')
+    mu = 0.5;
+    sigma = 1;
+    nd=makedist('normal','mu',mu,'sigma',sigma);
+    td=truncate(nd,0,inf);
+    iter = 10;
+    Wi = random(td,N*iter,1);
+end
 %}
 
 
-Wm = W1;
-Wl = W2;
+%Wm = Wm;
+%Wl = Wl;
 
 W_min = Wm-Wl;
 W_max = Wm+Wl;
 
 
 epsilon_ref = Ref;
-
-M = c * lambda /n*power(1/n,beta);
+%{
+M = c * lambda /i*power(1/i,beta);
 temp = 0; 
-for i = 1:n
+for i = 1:i
     temp = temp + power(i,beta);
 end
  
 M = M*temp;
+%}
 
-
-endpoint = W_max/M;
+%endpoint = W_max/M;
 
 %epsilon_max = opt_eps_max1;
 %epsilon_max = 0.002:0.0001:endpoint;
-epsilon_max = Epsilon_max;
+epsilon_max = Epsilon_searchrange;
 prospect_val_parti = zeros(1,length(epsilon_max));
 prospect_val_nonparti = zeros(1,length(epsilon_max));
 sum = zeros(1,length(epsilon_max));
@@ -94,49 +95,49 @@ Opt_G = 0;
 %p = parpool(4);
 %ttime = tic;
 
-for m = 1:length(epsilon_max)
+for i = 1:length(epsilon_max)
     
-    sum(m) = 0;
-    norm(m) = 0;
-    for i = 1:n
-        p = 1/n;
-        epsilon = epsilon_max(m)/n*i;
-        norm(m) = norm(m) + Weighting_Fun( p, u );
-        sum(m) = sum(m) + Weighting_Fun( p, u )* Valuation_Fun( epsilon,beta,lambda,alpha,epsilon_ref);
+    sum(i) = 0;
+    norm(i) = 0;
+    for j = 1:m
+        p = 1/m;
+        epsilon = epsilon_max(i)/m*j;
+        norm(i) = norm(i) + Weighting_Fun( p, u );
+        sum(i) = sum(i) + Weighting_Fun( p, u )* Valuation_Fun( epsilon,beta,lambda,alpha,epsilon_ref);
     end
 
-    prospect_val_parti(m) = sum(m) / norm(m);
+    prospect_val_parti(i) = sum(i) / norm(i);
     
-    prospect_val_nonparti(m) = power(epsilon_ref,alpha);
+    prospect_val_nonparti(i) = power(epsilon_ref,alpha);
     
-    G_parti(m) = c * prospect_val_parti(m);
+    G_parti(i) = c * prospect_val_parti(i);
     
-    G_nonparti(m) = c * prospect_val_nonparti(m);
+    G_nonparti(i) = c * prospect_val_nonparti(i);
     
-    G_dif(m) = G_nonparti(m)-G_parti(m);
-    
-    
+    G_dif(i) = G_nonparti(i)-G_parti(i);
+      
     %{
-    nn=0;    
-    len = length(Wi);
-    for ii=1:len
-        if Wi(ii)>G_dif(m)
-            nn = nn+1;
+    if strcmp(opt, 'truncated')
+        
+        nn=0;    
+        len = length(Wi);
+        for ii=1:len
+            if Wi(ii)>G_dif(i)
+                nn = nn+1;
+            end
         end
-    end
-    num(m) = floor(nn/iter);
+        num(i) = floor(nn/iter);
+    else
     %}
-    
-    
-    
-    if G_dif(m)<W_min
-        num(m)=N;
-    else if G_dif(m)>=W_min && G_dif(m)<=W_max
-            num(m) = N*(W_max-G_dif(m))/2/Wl;
-        else
-            num(m) = 0;
+        if G_dif(i)<W_min
+            num(i)=N;
+        else if G_dif(i)>=W_min && G_dif(i)<=W_max
+                num(i) = N*(W_max-G_dif(i))/2/Wl;
+            else
+                num(i) = 0;
+            end
         end
-    end
+    
     
     
     
@@ -154,39 +155,39 @@ for m = 1:length(epsilon_max)
     %k = 0.109;
     %R_num(m) = k*log(1+g*num(m));
 
-    R_num(m) = 1 - k/(1+l*num(m));
+    R_num(i) = 1 - k/(1+l*num(i));
     
     %g_num(m) = l * num(m);
     
     %R_num = 1 - u*exp(-h*num(m));
-    if R_num(m) < 0
-        R_num(m) = 0;
+    if R_num(i) < 0
+        R_num(i) = 0;
     end
     
-    S_f = 1 / num(m);
+    S_f = 1 / num(i);
     
-    l_v(m) = S_f / epsilon_max(m);
+    l_v(i) = S_f / epsilon_max(i);
     
     %gamma = -l_v(m) * log(theta);
     
     %gamma = l_v(m);
     
-    gamma = 2*l_v(m)^2;
+    gamma = 2*l_v(i)^2;
     
-    Acc(m) = gamma;
+    Acc(i) = gamma;
     
-    U_c(m) = R_num(m) - Acc(m);
+    U_c(i) = R_num(i) - Acc(i);
    
 
 end
 
 %save 'data';
 
-for m = 1:length(epsilon_max)
-    if U_c(m) > Opt_U
-        Opt_U = U_c(m);
-        Opt_epsilon_max = epsilon_max(m);
-        Opt_num = num(m);
+for i = 1:length(epsilon_max)
+    if U_c(i) > Opt_U
+        Opt_U = U_c(i);
+        Opt_epsilon_max = epsilon_max(i);
+        Opt_num = num(i);
         %Opt_index = m;
     end
 end
@@ -197,8 +198,8 @@ end
 %toc(ttime);
 
 %hold on;
-
-plot(epsilon_max,U_c,'-');
+%figure;
+%plot(epsilon_max,U_c,'-');
 
 %{
 beta1 = 1; 

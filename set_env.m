@@ -5,3 +5,4 @@
 parent='E:\liao\MATLAB\Differential Privacy\';
 path(path, parent);
 path(path, [parent 'figure']);
+path(path, [parent 'data']);
