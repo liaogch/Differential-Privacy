@@ -1,22 +1,30 @@
-function [ Opt_U,Opt_epsilon_max, Opt_num,U] = ProspectTheoryBased_GMPTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,N,C,W,iteration,Epsilon_searchrange )
+function [ Opt_U,Opt_epsilon_max, Opt_num] = ProspectTheoryBased_PTPara( Lambda_spec,Beta_spec,Alpha,Mu,Ref,N,C,W_spec,iteration,Epsilon_searchrange )
 
-U = 0;
+%Opt_U  = zeros(1,iteration);
+%Opt_epsilon_max = zeros(1,iteration);
+%Opt_num = zeros(1,iteration);
 
-Lambda_spec.N = N*iteration;
-Beta_spec.N = N*iteration;
+%{
+for jj = 1:iteration
+    
+    Lambda_spec.N = N;
+    Beta_spec.N = N;
+    W_spec.N = N;
 
-[lambda_N,~ ]= PT_Parameter_GM( Lambda_spec);
-[beta_N,~ ]= PT_Parameter_GM( Beta_spec);
+    lambda_N = PT_Parameter_Generation( Lambda_spec);
+    beta_N = PT_Parameter_Generation( Beta_spec);
+    W_N = W_Parameter_Generation(W_spec);
 
-alpha = Alpha;
+    alpha = Alpha;
+%}
 %lambda = Lambda;
 %beta = Beta;
 %alpha = Alpha;
 
 %From "advanced in prospect theory cumulative representation of uncertainty"
 
-m = 100;
-u = Mu;
+    m = 100;
+    u = Mu;
 %{
 N = Num;
 %n_target = N/3*2; %data amount utility is 2/3 at this number
@@ -28,18 +36,20 @@ k = 1.109;
 l=(3*1.109-1)/n_target;
 %}
 
-N = N;
 %n_target = N/3*2; %data amount utility is 2/3 at this number
-n_target = 600; %data amount utility is 2/3 at this number
+
+    n_target = 600; %data amount utility is 2/3 at this number
 
 %k = 0.909;
-k = 0.989;
 %k = 0.273;
 %g = 0.271;
-l=(3*1.109-1)/n_target;
+    k = 0.989;
+
+    l=(3*1.109-1)/n_target;
 
 
-c = C;
+
+    c = C;
 
 %theta = 0.05; 
 
@@ -62,7 +72,7 @@ W_min = Wm-Wl;
 W_max = Wm+Wl;
 %}
 
-epsilon_ref = Ref;
+    epsilon_ref = Ref;
 %{
 M = c * lambda /i*power(1/i,beta);
 temp = 0; 
@@ -77,7 +87,7 @@ M = M*temp;
 
 %epsilon_max = opt_eps_max1;
 %epsilon_max = 0.002:0.0001:endpoint;
-epsilon_max = Epsilon_searchrange;
+    epsilon_max = Epsilon_searchrange;
 %prospect_val_parti = zeros(1,length(epsilon_max));
 %prospect_val_nonparti = zeros(1,length(epsilon_max));
 %sum = zeros(1,length(epsilon_max));
@@ -85,19 +95,20 @@ epsilon_max = Epsilon_searchrange;
 %G_parti = zeros(1,length(epsilon_max));
 %G_nonparti = zeros(1,length(epsilon_max));
 %G_dif = zeros(1,length(epsilon_max));
-num = zeros(1,length(epsilon_max));
-U_c = zeros(1,length(epsilon_max));
-R_num = zeros(1,length(epsilon_max));
-Acc = zeros(1,length(epsilon_max));
-l_v = zeros(1,length(epsilon_max));
+    num = zeros(1,length(epsilon_max));
+    U_c = zeros(1,length(epsilon_max));
+    R_num = zeros(1,length(epsilon_max));
+    Acc = zeros(1,length(epsilon_max));
+    l_v = zeros(1,length(epsilon_max));
 %g_num = zeros(1,length(epsilon_max));
 
+%{
 Opt_U = -1000;
 Opt_epsilon_max = 0;
 Opt_index = 0;
 Opt_num = 0;
 Opt_G = 0;
-
+%}
 
 
 %p = parpool(4);
@@ -128,33 +139,56 @@ for i = 1:length(epsilon_max)
 
         %counting number of participants
         
-        len = N*iteration;
+        %len = N;
         nn=0;    
-        for ii=1:len
-            sum = 0;
+        for jj = 1:iteration
+    
+            Lambda_spec.N = N;
+            Beta_spec.N = N;
+            W_spec.N = N;
+
+            lambda_N = PT_Parameter_Generation( Lambda_spec);
+            beta_N = PT_Parameter_Generation( Beta_spec);
+            W_N = W_Parameter_Generation(W_spec);
+
+            alpha = Alpha;
+            
+            
+            for ii=1:N
+            %{
+            if check_participation( lambda_N(ii),beta_N(ii),alpha,epsilon_ref,W_N(ii),c,epsilon_max,m)==1
+                nn = nn+1;
+             end
+            %}
+            
+                sum = 0;
             %norm = 0;
-            for j = 1:m
+                for j = 1:m
                 %p = 1/m;
-                epsilon = epsilon_max(i)/m*j;
+                    epsilon = epsilon_max(i)/m*j;
                 %norm = norm + Weighting_Fun( p, u );
                 %sum(i) = sum(i) + Weighting_Fun( p, u )* Valuation_Fun( epsilon,beta,lambda,alpha,epsilon_ref);
-                sum = sum + Valuation_Fun( epsilon,beta_N(ii),lambda_N(ii),alpha,epsilon_ref);
-            end
+                    sum = sum + Valuation_Fun( epsilon,beta_N(ii),lambda_N(ii),alpha,epsilon_ref);
+                end
 
-        prospect_val_parti = sum / m;
+            prospect_val_parti = sum / m;
     
-        prospect_val_nonparti = power(epsilon_ref,alpha);
+            prospect_val_nonparti = power(epsilon_ref,alpha);
     
-        G_parti = c * prospect_val_parti;
+            G_parti = c * prospect_val_parti;
     
-        G_nonparti = c * prospect_val_nonparti;
+            G_nonparti = c * prospect_val_nonparti;
     
-        G_dif = G_nonparti-G_parti;
+            G_dif = G_nonparti-G_parti;
     
-            if W>G_dif
-                nn = nn+1;
+                if W_N(ii)>G_dif
+                    nn = nn+1;
+                end
+           
+        
             end
         end
+
         
         num(i) = floor(nn/iteration);
     %{
@@ -201,20 +235,33 @@ for i = 1:length(epsilon_max)
     
     %gamma = l_v(m);
     
-    gamma = 2*l_v(i)^2;
+    r = 1;
+    
+    gamma = r*2*l_v(i)^2;
     
     Acc(i) = gamma;
     
     U_c(i) = R_num(i) - Acc(i);
-    
-    if abs(epsilon_max(i)-0.0180) < 0.0001
-        U = U_c(i);
-    end
 
+    
 end
 
-%save 'data';
+    [Opt_U, Opt_index] = max(U_c);
+    Opt_epsilon_max = epsilon_max(Opt_index);
+    Opt_num = num(Opt_index);
+%{
+    [Opt_U(jj), Opt_index] = max(U_c);
+    Opt_epsilon_max(jj) = epsilon_max(Opt_index);
+    Opt_num(jj) = num(Opt_index);
+%}
+%end
 
+%Opt_U_ave = mean(Opt_U);
+%Opt_epsilon_max_ave = mean(Opt_epsilon_max);
+%Opt_num_ave = floor(mean(Opt_num));
+
+%save 'data';
+%{
 for i = 1:length(epsilon_max)
     if U_c(i) > Opt_U
         Opt_U = U_c(i);
@@ -223,6 +270,7 @@ for i = 1:length(epsilon_max)
         %Opt_index = m;
     end
 end
+%}
 %opt_eps_max = [opt_eps_max Opt_epsilon_max];
 
 
@@ -231,7 +279,7 @@ end
 
 %hold on;
 %figure;
-plot(epsilon_max,U_c,'-');
+%plot(epsilon_max,U_c,'-');
 
 
 %{

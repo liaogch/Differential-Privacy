@@ -633,11 +633,11 @@ hold on;
 plot(beta,Opt_epsilon_max_6,'b*-')
 %}
 
-iteration = 10;
+iteration = 20;
 Ref = 0;
 Num = 5000;
 C = 1;
-Epsilon_searchrange = 0.007:0.0001:0.025;
+Epsilon_searchrange = 0.013:0.0001:0.02;
 
 W_spec.average = 1;
 W_spec.sigma = 1;
@@ -647,33 +647,26 @@ W_spec.upper = 2;
 lambda = 1.5:0.5:3.5;
 beta = 0.4:0.1:0.9;
 
-%{
-Opt_U_3 = zeros(length(beta),length(lambda));
-Opt_epsilon_max_3 = zeros(length(beta),length(lambda));
-Opt_num_3 = zeros(length(beta),length(lambda));
+Opt_U_1 = zeros(length(beta),length(lambda));
+Opt_epsilon_max_1 = zeros(length(beta),length(lambda));
+Opt_num_1 = zeros(length(beta),length(lambda));
 
-Opt_U_4 = zeros(length(beta),length(lambda));
-Opt_epsilon_max_4 = zeros(length(beta),length(lambda));
-Opt_num_4 = zeros(length(beta),length(lambda));
-%}
+Opt_U_2 = zeros(length(beta),length(lambda));
+Opt_epsilon_max_2 = zeros(length(beta),length(lambda));
+Opt_num_2 = zeros(length(beta),length(lambda));
 
-for i = 1
-    for j = 1:6
+for i = 1:length(lambda)
+    for j = 1
         tic;
         Ref = 0;
         beta_homo_spec.value = beta(j);
-        Alpha = beta(j);
         lambda_homo_spec.value = lambda(i);
-        
-        %[ Opt_U_3(j,i),Opt_epsilon_max_3(j,i), Opt_num_3(j,i)] = ProspectTheoryBased_PTPara( lambda_homo_spec,beta_homo_spec,Alpha,Mu,Ref,Num,C,W_spec,iteration,Epsilon_searchrange);
+        [ Opt_U_1(j,i),Opt_epsilon_max_1(j,i), Opt_num_1(j,i)] = ProspectTheoryBased_PTPara( lambda_homo_spec,beta_homo_spec,Alpha,Mu,Ref,Num,C,W_spec,iteration,Epsilon_searchrange);
         
         Ref=0.01;
-        [ Opt_U_4(j,i),Opt_epsilon_max_4(j,i), Opt_num_4(j,i)] = ProspectTheoryBased_PTPara( lambda_homo_spec,beta_homo_spec,Alpha,Mu,Ref,Num,C,W_spec,iteration,Epsilon_searchrange);
-        toc
+        [ Opt_U_1(j,i),Opt_epsilon_max_1(j,i), Opt_num_1(j,i)] = ProspectTheoryBased_PTPara( lambda_homo_spec,beta_homo_spec,Alpha,Mu,Ref,Num,C,W_spec,iteration,Epsilon_searchrange);
     end
 end
-
-%plot(lambda,Opt_epsilon_max_3(3,:),'-b*',lambda,Opt_epsilon_max_4(3,:),'-.ro','LineWidth',2,'MarkerSize',8)
 
 %{
 Opt_U_1 = zeros(1,length(lambda));
