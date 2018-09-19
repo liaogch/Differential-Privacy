@@ -418,6 +418,7 @@ for i = 1: length(beta_sigma)
     toc
 end
 %}
+PT_parameters1_gamma_fit;
 lambda_spec.distribution = 'Gamma';
 lambda_spec.shape = par_gam_lambda(1);
 lambda_spec.scale = par_gam_lambda(2);
@@ -633,11 +634,11 @@ hold on;
 plot(beta,Opt_epsilon_max_6,'b*-')
 %}
 
-iteration = 10;
+iteration = 50;
 Ref = 0;
 Num = 5000;
 C = 1;
-Epsilon_searchrange = 0.007:0.0001:0.025;
+Epsilon_searchrange = 0.005:0.0001:0.020;
 
 W_spec.average = 1;
 W_spec.sigma = 1;
@@ -645,7 +646,7 @@ W_spec.lower = 0;
 W_spec.upper = 2;
 
 lambda = 1.5:0.5:3.5;
-beta = 0.4:0.1:0.9;
+beta = 0.4:0.1:0.8;
 
 %{
 Opt_U_3 = zeros(length(beta),length(lambda));
@@ -657,18 +658,18 @@ Opt_epsilon_max_4 = zeros(length(beta),length(lambda));
 Opt_num_4 = zeros(length(beta),length(lambda));
 %}
 
-for i = 1
-    for j = 1:6
+for i = 3
+    for j = 4
         tic;
         Ref = 0;
         beta_homo_spec.value = beta(j);
         Alpha = beta(j);
         lambda_homo_spec.value = lambda(i);
         
-        %[ Opt_U_3(j,i),Opt_epsilon_max_3(j,i), Opt_num_3(j,i)] = ProspectTheoryBased_PTPara( lambda_homo_spec,beta_homo_spec,Alpha,Mu,Ref,Num,C,W_spec,iteration,Epsilon_searchrange);
+        [ Opt_U_3(j,i),Opt_epsilon_max_5(j,i), Opt_num_3(j,i)] = ProspectTheoryBased_PTPara( lambda_homo_spec,beta_homo_spec,Alpha,Mu,Ref,Num,C,W_spec,iteration,Epsilon_searchrange);
         
         Ref=0.01;
-        [ Opt_U_4(j,i),Opt_epsilon_max_4(j,i), Opt_num_4(j,i)] = ProspectTheoryBased_PTPara( lambda_homo_spec,beta_homo_spec,Alpha,Mu,Ref,Num,C,W_spec,iteration,Epsilon_searchrange);
+        [ Opt_U_4(j,i),Opt_epsilon_max_6(j,i), Opt_num_4(j,i)] = ProspectTheoryBased_PTPara( lambda_homo_spec,beta_homo_spec,Alpha,Mu,Ref,Num,C,W_spec,iteration,Epsilon_searchrange);
         toc
     end
 end

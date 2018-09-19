@@ -22,8 +22,8 @@ for jj = 1:iteration
 %alpha = Alpha;
 
 %From "advanced in prospect theory cumulative representation of uncertainty"
+%m=100
 
-    m = 100;
     u = Mu;
 %{
 N = Num;
@@ -160,7 +160,7 @@ for i = 1:length(epsilon_max)
                 nn = nn+1;
              end
             %}
-            
+                m = 100;
                 sum = 0;
             %norm = 0;
                 for j = 1:m

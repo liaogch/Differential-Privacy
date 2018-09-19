@@ -1,4 +1,4 @@
-function [ res ] = check_participation( lambda,beta,alpha,epsilon_ref,W,c,epsilon_max,m)
+function [ res, diff  ] = check_participation( lambda,beta,alpha,epsilon_ref,W,c,epsilon_max,m)
     sum = 0;
     for j = 1:m
                 
@@ -11,7 +11,9 @@ function [ res ] = check_participation( lambda,beta,alpha,epsilon_ref,W,c,epsilo
     
     prospect_val_nonparti = power(epsilon_ref,alpha);
     
-    if W> c*prospect_val_nonparti-c*prospect_val_parti;
+    diff = c*prospect_val_nonparti-c*prospect_val_parti;
+    
+    if W> diff;
        res = 1;
     else
        res = 0;
