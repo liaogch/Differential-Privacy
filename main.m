@@ -17,7 +17,7 @@ plot(lambda,Opt_U,'*',lambda,Uc_byEUT,'o');
 dif=Opt_U-Uc_byEUT;
 per = dif./Opt_U*100
 %}
-
+%contour(beta,lambda,dif,2,'ShowText','on')
 %{
 x=-0.25:0.001:0.25;
 len = length(x);
